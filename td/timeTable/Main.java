@@ -1,4 +1,4 @@
-package td.negociation;
+package td.timeTable;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -21,7 +21,7 @@ public class Main  {
         // display a control/debug window
         prop.setProperty(Profile.GUI, "true");
         // declare the agents
-        prop.setProperty(Profile.AGENTS, "buyer:td.negociation.BuyerAgent;seller:td.negociation.SellerAgent");
+        prop.setProperty(Profile.AGENTS, "enseignant1:td.timeTable.AgentEnseignant;enseignant2:td.timeTable.AgentEnseignant;enseignant2:td.timeTable.AgentEnseignant");
         // create the ain container
         ProfileImpl profMain = new ProfileImpl(prop);
         // launch it !
