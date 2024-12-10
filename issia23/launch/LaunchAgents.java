@@ -1,5 +1,6 @@
 package issia23.launch;
 
+import issia23.data.Product;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -9,6 +10,8 @@ import java.util.Properties;
 
 public class LaunchAgents {
     public static void main(String[] args) {
+        //creer la liste des produits
+        Product.getListProducts();
         // preparer les arguments pout le conteneur JADE
         Properties prop = new ExtendedProperties();
         // demander la fenetre de controle
@@ -29,5 +32,6 @@ public class LaunchAgents {
         // lancer le conteneur principal
         Runtime rt = Runtime.instance();
         rt.createMainContainer(profMain);
+
     }
 }

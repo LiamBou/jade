@@ -1,14 +1,14 @@
 package issia23.agents;
 
+import issia23.data.Product;
 import jade.core.AID;
 import jade.core.AgentServicesTools;
-import jade.core.behaviours.WakerBehaviour;
 import jade.domain.FIPANames;
 import jade.gui.AgentWindowed;
 import jade.gui.GuiEvent;
 import jade.gui.SimpleWindow4Agent;
 import jade.lang.acl.ACLMessage;
-import jade.proto.ContractNetInitiator;
+import issia23.behaviours.ContacterRepairCafe;
 
 import java.util.*;
 
@@ -22,6 +22,8 @@ public class UserAgent extends AgentWindowed {
      */
     List<AID> helpers;
 
+    List<Product> products;
+
     @Override
     public void setup() {
         this.window = new SimpleWindow4Agent(getLocalName(), this);
@@ -30,6 +32,16 @@ public class UserAgent extends AgentWindowed {
         skill = (int) (Math.random() * 4);
         println("hello, I have a skill = " + skill);
         helpers = new ArrayList<>();
+
+        products = new ArrayList<>();
+        var allProducts = Product.getListProducts();
+        var nb = allProducts.size();
+        for(int i=0; i<3; i++) {
+            var rand = (int)(Math.random()*nb);
+            products.add(allProducts.get(rand));
+        }
+        println("i have the following products : ");
+        for(var p:products) println(p.getName() + " ");
     }
 
     @Override
@@ -50,8 +62,8 @@ public class UserAgent extends AgentWindowed {
     private void addCFP(){
         ACLMessage msg = new ACLMessage(ACLMessage.CFP);
         msg.setConversationId("id");
-        int randint = (int)(Math.random()*3);
-        msg.setContent(String.valueOf(randint));
+        int randint = (int)(Math.random()*products.size());
+        msg.setContent(products.get(randint).getName());
 
         msg.addReceivers(helpers.toArray(AID[]::new));
         println("-".repeat(40));
@@ -59,78 +71,18 @@ public class UserAgent extends AgentWindowed {
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
         msg.setReplyByDate(new Date(System.currentTimeMillis() + 1000));
 
-
-        ContractNetInitiator init = new ContractNetInitiator(this, msg) {
-            //function triggered by a PROPOSE msg
-            // @param propose     the received propose message
-            // @param acceptances the list of ACCEPT/REJECT_PROPOSAL to be sent back.
-            //                    list that can be modified here or at once when all the messages are received
-            @Override
-            public void handlePropose(ACLMessage propose, List<ACLMessage> acceptations) {
-                println("Agent %s proposes %s ".formatted(propose.getSender().getLocalName(), propose.getContent()));
-            }
-
-            //function triggered by a REFUSE msg
-            @Override
-            protected void handleRefuse(ACLMessage refuse) {
-                println("REFUSE ! I received a refuse from " + refuse.getSender().getLocalName());
-            }
-
-            //function triggered when all the responses are received (or after the waiting time)
-            //@param theirVotes the list of message sent by the voters
-            //@param myAnswers the list of answers for each voter
-            @Override
-            protected void handleAllResponses(List<ACLMessage> theirVotes, List<ACLMessage> myAnswers) {
-                ArrayList<ACLMessage> listeProposals = new ArrayList<>(theirVotes);
-                //we keep only the proposals only
-                listeProposals.removeIf(v -> v.getPerformative() != ACLMessage.PROPOSE);
-                myAnswers.clear();
-
-                ACLMessage bestProposal =null;
-                ACLMessage bestAnswer =null;
-                var bestPrice = Integer.MAX_VALUE;
-
-                for (ACLMessage proposal : listeProposals) {
-                    //by default, we build a accept answer for each proposal
-                    var answer = proposal.createReply();
-                    answer.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                    myAnswers.add(answer);
-                    var content = Integer.parseInt(proposal.getContent());
-                    println(proposal.getSender().getLocalName() + " has proposed " + content);
-                    if (content<bestPrice){
-                        bestPrice = content;
-                        bestProposal = proposal;
-                        bestAnswer = answer;
-                    }
-
-                }
-
-                if (bestProposal !=null)
-                {
-                    bestProposal.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    println("I choose the proposal of " + bestProposal.getSender().getLocalName());
-                }
-
-                println("-".repeat(40));
-
-            }
-
-            //function triggered by a INFORM msg : a voter accept the result
-            // @Override
-            protected void handleInform(ACLMessage inform) {
-                println("the vote is accepted by " + inform.getSender().getLocalName());
-            }
-
-
-        };
-
-        addBehaviour(init);
+        var contacterRepairCafe = new ContacterRepairCafe(this, msg);
+        addBehaviour(contacterRepairCafe);
     }
 
     /**here we simplify the scenario. A breakdown is about 1 elt..
      * so whe choose a no between 1 to 4 and ask who can repair at at wich cost.*/
     private void breakdown(){
 
+    }
+
+    public void println(String s){
+        window.println(s);
     }
 
     @Override
