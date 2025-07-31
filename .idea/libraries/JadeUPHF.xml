@@ -2,6 +2,7 @@
   <library name="JadeUPHF">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/../JadeUPHF.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../gson-2.12.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
